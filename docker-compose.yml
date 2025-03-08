@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/code_editor4
+      SPRING_DATASOURCE_USERNAME: abdullah
+      SPRING_DATASOURCE_PASSWORD: abdullah
+      DOCKER_HOST: unix:///var/run/docker.sock  # Point to the host Docker socket
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Mount host Docker socket
+
+  frontend:
+    build:
+      context: ./collaborativeCode
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:9.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: abdullah
+      MYSQL_DATABASE: code_editor4
+      MYSQL_USER: abdullah
+      MYSQL_PASSWORD: abdullah
+    ports:
+      - "3307:3306"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
